@@ -6,7 +6,7 @@
  * Description: Add Ninja form field to WPGraphQL.
  * Author: M.D. Leguijt
  * Author URI: https://mddd.nl
- * Version: 1.0.0
+ * Version: 1.0.1
  */
 
 if (!defined('ABSPATH')) {
@@ -51,3 +51,9 @@ add_filter( 'wpgraphql_acf_register_graphql_field', function($field_config, $typ
 
 	return $field_config;
 }, 10, 4 );
+
+add_action( 'graphql_register_types', function() {
+
+  rename_graphql_field( 'Form', 'fields', 'formFields' );
+
+});
