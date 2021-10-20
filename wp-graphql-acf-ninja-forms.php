@@ -1,12 +1,12 @@
 <?php
 
 /**
- * Plugin Name: Ninja Form Field WPGraphQL Extension
+ * Plugin Name: ACF: Ninja Form Field WPGraphQL Extension
  * Plugin URI: https://mddd.nl
  * Description: Add Ninja form field to WPGraphQL.
  * Author: M.D. Leguijt
  * Author URI: https://mddd.nl
- * Version: 1.0.1
+ * Version: 1.0.2
  */
 
 if (!defined('ABSPATH')) {
@@ -36,24 +36,17 @@ add_filter( 'wpgraphql_acf_register_graphql_field', function($field_config, $typ
 	$field_config['type'] = 'Form';
 
 	// add resolver
-	$field_config['resolve'] = function( $root ) use ( $acf_field ) {
-		// when field is used in WP_Post and is top-level field (not nested in repeater, flexible content etc.)
-		if( $root->ID ) {
-			$value = get_field( $acf_field['key'], $root->ID, false );
-
-		// when field is used in WP_Post and is nested in repeater, flexible content etc. ...
-		} elseif( array_key_exists( $acf_field['key'], $root ) ) {
+	$field_config['resolve'] = function( $root, $args, $context ) use ( $acf_field ) {
+		if( array_key_exists( $acf_field['key'], $root ) ) {
 			$value = $root[$acf_field['key']];
 		} 
 
-		return !empty( $value ) ? $value : null;
+		if (!empty($value)) {
+			$form = $context->get_loader('form')->load_deferred($value);
+		}
+
+		return !empty( $form ) ? $form : null;
 	};
 
 	return $field_config;
 }, 10, 4 );
-
-add_action( 'graphql_register_types', function() {
-
-  rename_graphql_field( 'Form', 'fields', 'formFields' );
-
-});
